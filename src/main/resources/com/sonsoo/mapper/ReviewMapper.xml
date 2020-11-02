@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.ReviewMapper">
+
+	<select id="getReviewList" resultType="com.sonsoo.domain.ReviewVO">
+		<![CDATA[
+		select * from reviewBoard where p_id = #{p_id} order by rno desc
+		]]>
+	</select>
+	
+	<select id="getReviewListWithPaging" resultType="com.sonsoo.domain.ReviewVO">
+		<![CDATA[
+			select rno, id, p_id, title, content, regDate, uploadFile, imageName, star from 
+			(select rownum rn, rno, id, p_id, title, content, regDate, uploadFile, imageName, star 
+			from reviewBoard where rownum <= #{pageNum} * #{amount} and p_id = #{p_id} order by rno desc)
+			where rn > ((#{pageNum} -1) * #{amount}) and p_id = #{p_id} order by rno desc
+		]]>
+	</select>
+
+	<select id="getReviewStarAvg" resultType="string">
+ 	 <![CDATA[
+ 		select ROUND(AVG(star),1) as starAvg from reviewBoard where p_id = #{p_id}
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStar5" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id} and star = '5'
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStar4" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id} and star = '4'
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStar3" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id} and star = '3'
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStar2" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id} and star = '2'
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStar1" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id} and star = '1'
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewStarCnt" resultType="int">
+ 	 <![CDATA[
+ 		select count(*) as starcount from reviewBoard where p_id = #{p_id}
+ 	]]> 
+ 	</select>
+ 	
+ 	<select id="getReviewYN" resultType="int">
+ 	<![CDATA[
+ 		select count(*) as count from reviewBoard where id = #{id} and p_id = #{p_id}
+ 	]]> 
+ 	</select>
+ 	
+ 	<insert id="insertReview" parameterType="com.sonsoo.domain.ReviewVO">
+ 	<![CDATA[
+ 		insert into reviewBoard(rno, id, p_id, title, content, uploadFile, imageName, star)
+ 		values((select nvl(max(rno),0)+1 from reviewBoard),#{id},#{p_id},#{title},#{content},#{images,jdbcType=VARCHAR},#{imageName,jdbcType=VARCHAR},#{star})
+ 	]]>	
+ 	</insert>
+ 	
+ 	<select id="getReview" resultType="com.sonsoo.domain.ReviewVO">
+ 	<![CDATA[
+ 		select * from reviewBoard where rno = #{rno}	
+ 	]]>
+ 	</select>
+ 	
+ 	<delete id="deleteReview" parameterType="com.sonsoo.domain.ReviewVO">
+ 	<![CDATA[
+ 		delete from reviewBoard where rno = #{rno}
+ 	]]>
+ 	</delete>
+ 	
+ 	<update id="updateReview" parameterType="com.sonsoo.domain.ReviewVO">
+ 	<![CDATA[
+ 		update reviewBoard set title=#{title}, content=#{content}, star=#{star},
+ 		uploadFile=#{images,jdbcType=VARCHAR}, imageName=#{imageName,jdbcType=VARCHAR} where rno=#{rno}
+ 					
+ 	]]>
+ 	</update>
+ 	
+</mapper>

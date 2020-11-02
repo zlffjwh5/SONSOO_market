@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.OrderMapper">
+
+	<insert id="insertOrder" parameterType="com.sonsoo.domain.OrderVO">
+		<![CDATA[
+  		insert into orders(seq,o_number,id,name,phone,postcode,address,detailAddress,extraAddress,requestedTerm,couponUsed,totalCost,p_id,qty)
+			values(seq_orders.nextval,#{o_number},#{id},#{name},#{phone},#{postcode},#{address},#{detailAddress},#{extraAddress}
+													,#{requestedTerm},#{couponUsed},#{totalCost},#{p_id},#{qty})
+  		]]>      
+ 	</insert>
+ 	
+ 	<insert id="insertOrderedProduct" parameterType="com.sonsoo.domain.OrderedProductVO">
+ 		insert into orderedProduct(seq,o_number,p_id,p_name,price,qty,tnImage)
+			values(seq_orderedProduct.nextval,#{o_number},#{p_id},#{p_name},#{price},#{qty},#{tnImage})
+ 	</insert>
+ 	
+ 	<insert id="insertCardPay" parameterType="com.sonsoo.domain.CardPayVO">
+ 		insert into cardpay(seq,o_number,cardNumber,expDate,securityCode)
+			values(seq_cardpay.nextval,#{o_number},#{cardNumber},#{expDate},#{securityCode})
+ 	</insert>
+ 	
+ 	<update id="updateStatus" parameterType="hashMap">
+ 		update orders set status=#{status} where o_number=#{o_number}
+ 	</update>
+ 	
+ 	<select id="getMember" parameterType="com.sonsoo.domain.MemberVO" resultType="com.sonsoo.domain.MemberVO">
+ 		<![CDATA[select id, name,phone,postcode, address, detailAddress, extraAddress from member where id=#{id}]]>
+ 	</select>
+ 	
+ 	<select id="getCoupon" parameterType="com.sonsoo.domain.CouponVO" resultType="com.sonsoo.domain.CouponVO">
+ 		<![CDATA[select id, couponName, discount from coupon where id=#{id}]]>
+ 	</select>
+ 	
+ 	<select id="getProduct" parameterType="com.sonsoo.domain.ProductVO" resultType="com.sonsoo.domain.ProductVO">
+ 		select * from products where p_id=#{p_id}
+ 	</select>
+ 	
+ 	<select id="getVO" parameterType="com.sonsoo.domain.OrderVO" resultType="com.sonsoo.domain.OrderVO">
+ 		select * from orders where o_number=#{o_number}
+ 	</select>
+ 	 	
+ 	<select id="getPVO" parameterType="com.sonsoo.domain.OrderedProductVO" resultType="com.sonsoo.domain.OrderedProductVO">
+ 		select * from orderedProduct where o_number=#{o_number}
+ 	</select> 	
+ 	
+ 	<select id="getPVOList" parameterType="com.sonsoo.domain.OrderedProductVO" resultType="com.sonsoo.domain.OrderedProductVO">
+ 		select * from orderedProduct where o_number=#{o_number}
+ 	</select>
+ 	
+ 	<delete id="removeCartList" parameterType="hashMap">
+ 		delete from cart where p_id=#{p_id} and id=#{id} 
+ 	</delete> 	
+	
+
+</mapper>

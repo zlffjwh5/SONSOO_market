@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.sonsoo.mapper.VisitorMapper">
+	
+	<select id="memberSList" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select m.id, m.name, m.reg_date, sum(case when o.id=m.id then o.totalcost end) as totalcost
+			from member m ,orders o
+		group by m.id, m.name, m.reg_date order by m.id
+	]]>
+	</select>
+	
+	<select id="memberCList" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select m.id, m.name, count(case when v.id=m.id then v.visit_date end) as visit
+			from member m, visitor v
+		group by m.id, m.name order by m.id
+	]]>
+	</select>
+	
+	<select id="memberInformation" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select id, name, phone, postcode, address, detailaddress, reg_date
+		from member where id=#{id}
+	]]>
+	</select>
+	
+	<select id="memberTotalCost" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select sum(case when id=#{id} then totalcost end) as memberTotalCost
+		from orders where id=#{id}
+	]]>
+	</select>
+	
+	<select id="memberTotalVisit" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select count(case when id=#{id} then visit_date end) as memberTotalVisit
+		from visitor where id=#{id}
+	]]>
+	</select>
+	
+	<select id="memberCouponCnt" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select count(*) as coupon from coupon where id = #{id}
+	]]>
+	</select>
+	
+	<select id="memberVisit" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+		select max(visit_date) as visit_Date from VISITOR where id = #{id}
+	]]>
+	</select>
+	
+	<select id="memberOrderAndShipping" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+	select count(case when op.status = '1' then 1 end) as status1,
+		count(case when op.status = '2' then 1 end) as status2,
+		count(case when op.status = '3' then 1 end) as status3,
+		count(case when op.status = '4' then 1 end) as status4,
+		count(case when op.status = '5' then 1 end) as status5,
+		count(case when op.status = '6' then 1 end) as status6,
+		count(case when op.status = '7' then 1 end) as status7,
+		count(case when op.status = '8' then 1 end) as status8
+	from orderedProduct op, orders o where o.id=#{id} and op.o_number=o.o_number
+	]]>
+	</select>
+	
+	<select id="memberMonthVisit" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+	select count(case when to_char(visit_date,'MM') = '01' then 1 end) as mvisit1,
+	   count(case when to_char(visit_date,'MM') = '02' then 1 end) as mvisit2,
+	   count(case when to_char(visit_date,'MM') = '03' then 1 end) as mvisit3,
+	   count(case when to_char(visit_date,'MM') = '04' then 1 end) as mvisit4,
+	   count(case when to_char(visit_date,'MM') = '05' then 1 end) as mvisit5,
+	   count(case when to_char(visit_date,'MM') = '06' then 1 end) as mvisit6,
+	   count(case when to_char(visit_date,'MM') = '07' then 1 end) as mvisit7,
+	   count(case when to_char(visit_date,'MM') = '08' then 1 end) as mvisit8,
+	   count(case when to_char(visit_date,'MM') = '09' then 1 end) as mvisit9,
+	   count(case when to_char(visit_date,'MM') = '10' then 1 end) as mvisit10
+	from visitor where id=#{id}
+	]]>
+	</select>
+	
+	<select id="memberMonthTotalCost" resultType="com.sonsoo.domain.VisitorVO">
+	<![CDATA[
+	select sum(case when to_char(o_date,'MM') = '01' then totalCost end) as mtotal1,
+	   sum(case when to_char(o_date,'MM') = '02' then totalCost end) as mtotal2,
+	   sum(case when to_char(o_date,'MM') = '03' then totalCost end) as mtotal3,
+	   sum(case when to_char(o_date,'MM') = '04' then totalCost end) as mtotal4,
+	   sum(case when to_char(o_date,'MM') = '05' then totalCost end) as mtotal5,
+	   sum(case when to_char(o_date,'MM') = '06' then totalCost end) as mtotal6,
+	   sum(case when to_char(o_date,'MM') = '07' then totalCost end) as mtotal7,
+	   sum(case when to_char(o_date,'MM') = '08' then totalCost end) as mtotal8,
+	   sum(case when to_char(o_date,'MM') = '09' then totalCost end) as mtotal9,
+	   sum(case when to_char(o_date,'MM') = '10' then totalCost end) as mtotal10
+	from orders where id=#{id}
+	]]>
+	</select>
+	
+	
+</mapper>

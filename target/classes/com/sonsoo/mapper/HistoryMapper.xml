@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="com.sonsoo.mapper.HistoryMapper">
+	
+	<!-- 구매내역 테이블 ID로 조회 -->
+	<select id="getBuyListWithPaging" resultType="com.sonsoo.domain.OrderVO">
+		<![CDATA[
+			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+      			(
+  				select  rownum rn, o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  			 		(
+  		  			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from
+  		  				(
+  		  	 			select * from 
+  		  	 				(
+  		  	 				select o.o_number, odp.p_id, odp.qty, o.o_date, odp.status, o.id, o.name, o.phone, o.totalCost, p.name "P_NAME", odp.price, p.script, p.tnImage
+   							from orders o, products p,orderedproduct odp where odp.p_id = p.p_id and o.o_number = odp.o_number
+  		  	 				)
+  		  	 			where id=#{id} and o_number like 'TN%'
+  		  				) 
+  		  				order by o_date desc, o_number asc
+  		  			) 
+  		  			where rownum<=#{cri.pageNum}*#{cri.amount}
+  				) 
+  				where rn > (#{cri.pageNum}-1)*#{cri.amount}
+  ]]>
+	</select>
+	
+ 	<!-- 배송내역 테이블 status로 조회 -->
+	<select id="getShippingListWithPaging" resultType="com.sonsoo.domain.OrderVO">
+		<![CDATA[
+			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+      			(
+  				select  rownum rn, o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  			 		(
+  		  			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  		  				(
+  		  	 			select * from 
+  		  	 				(
+  		  	 				select o.o_number, odp.p_id, odp.qty, o.o_date, odp.status, o.id, o.name, o.phone, o.totalCost, p.name "P_NAME", odp.price, p.script, p.tnImage
+   							from orders o, products p,orderedproduct odp where odp.p_id = p.p_id and o.o_number = odp.o_number
+  		  	 				)
+  		  	 			orders where id=#{id}
+  		  				) 
+  		  				orders order by o_date desc, o_number asc
+  		  			) 
+  		  			where status between 1 and 5 and rownum<=#{cri.pageNum}*#{cri.amount}
+  				) 
+  				where rn > (#{cri.pageNum}-1)*#{cri.amount}
+  ]]>
+	</select>
+	
+	<!-- 환불내역 테이블 status로 조회 -->
+	<select id="getRefundListWithPaging" resultType="com.sonsoo.domain.OrderVO">
+		<![CDATA[
+			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+      			(
+  				select  rownum rn, o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  			 		(
+  		  			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  		  				(
+  		  	 			select * from 
+  		  	 				(
+  		  	 				select o.o_number, odp.p_id, odp.qty, o.o_date, odp.status, o.id, o.name, o.phone, o.totalCost, p.name "P_NAME", odp.price, p.script, p.tnImage
+   							from orders o, products p,orderedproduct odp where odp.p_id = p.p_id and o.o_number = odp.o_number
+  		  	 				)	
+  		  	 			orders where id=#{id}
+  		  				) 
+  		  				orders order by o_date desc, o_number asc
+  		  			) 
+  		  			where status in(6,7,8) and rownum<=#{cri.pageNum}*#{cri.amount}
+  				) 
+  				where rn > (#{cri.pageNum}-1)*#{cri.amount}
+	  ]]>
+	</select>
+	
+	<!-- 배송관리내역(관리자) -->
+	<select id="getSaleListWithPaging" resultType="com.sonsoo.domain.OrderVO">
+		<![CDATA[	
+			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+      			(
+  				select  rownum rn, o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from 
+  			 		(
+  		  			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, price, script, tnImage from
+  		  				(
+  		  	 			select o.o_number, odp.p_id, odp.qty, o.o_date, odp.status, o.id, o.name, o.phone, o.totalCost, p.name "P_NAME", odp.price, p.script, p.tnImage
+   						from orders o, products p,orderedproduct odp where odp.p_id = p.p_id and o.o_number = odp.o_number
+  		  				) 
+  		  				order by o_date desc, o_number asc
+  		  			) 
+  		  			where status in(1,2,3) and rownum<=#{pageNum}*#{amount}
+  				) 
+  				where rn > (#{pageNum}-1)*#{amount}
+  ]]>
+	</select>
+	
+	<!-- 환불신청 관리내역(관리자) -->
+	<select id="getWaitingListWithPaging" resultType="com.sonsoo.domain.RefundListVO">
+		<![CDATA[
+			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, requestDate, refundMeans, refundSystem from 
+      			(
+  				select  rownum rn, o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, requestDate, refundMeans, refundSystem from 
+  			 		(
+  		  			select o_number, p_id, qty, o_date, status, id, name, phone, totalCost, p_name, requestDate, refundMeans, refundSystem from
+  		  				(
+  		  	 			select o.o_number, rl.p_id, odp.qty, o.o_date, odp.status, o.id, o.name, o.phone, o.totalCost, p.name "P_NAME", requestDate, refundMeans, refundSystem
+   						from orders o, products p,orderedproduct odp, refundList rl
+   						where odp.p_id = p.p_id and o.o_number = odp.o_number and o.o_number = odp.o_number and odp.o_number = rl.o_number and odp.p_id = rl.p_id
+  		  				) 
+  		  				order by o_date desc, o_number asc
+  		  			) 
+  		  			where status in(6) and rownum<=#{pageNum}*#{amount}
+  				) 
+  				where rn > (#{pageNum}-1)*#{amount}
+  		]]>
+	</select>
+	
+	<!-- 목록 전체 갯수 얻기 -->
+	<select id="getTotalCount" resultType="int">
+	<![CDATA[
+		select count(*) from 
+			(
+			select op.seq, op.o_number, op.status, op.p_id, os.id from orderedProduct op, orders os where op.o_number = os.o_number
+			) 
+		where id = #{id}
+	]]>
+	</select>
+	
+	<select id="getTotalCountShipping" resultType="int">
+	<![CDATA[
+		select count(*) from 
+			(
+			select op.seq, op.o_number, op.status, op.p_id, os.id from orderedProduct op, orders os where op.o_number = os.o_number
+			) 
+		where status between 1 and 5 and id = #{id}
+	]]>
+	</select>
+	
+	<select id="getTotalCountRefund" resultType="int">
+	<![CDATA[
+		select count(*) from 
+			(
+			select op.seq, op.o_number, op.status, op.p_id, os.id from orderedProduct op, orders os where op.o_number = os.o_number
+			) 
+		where status in (6,7,8) and id = #{id}
+	]]>
+	</select>
+	
+	<select id="getTotalCountSale" resultType="int">
+	<![CDATA[
+		select count(*) from orderedProduct where status in (1,2,3)
+	]]>
+	</select>
+	
+	<select id="getTotalCountWaiting" resultType="int">
+	<![CDATA[
+		select count(*) from orderedProduct where status in (6)
+	]]>
+	</select>
+	
+	<select  id="getProduct" resultType="com.sonsoo.domain.OrderVO">
+   				select o_number, p_id, qty, id, name, phone, postcode, address, extraAddress, detailAddress, totalcost, status, p_name, price, script, tnImage from  
+  		  	 		(
+  		  	 		select o.o_number, odp.p_id, odp.qty, o.id, o.name, phone, postcode, address, extraAddress, detailAddress, totalcost, odp.status, p.name "P_NAME", p.price, script, p.tnImage from 
+  		  	 		orders o, products p, orderedproduct odp where odp.p_id = p.p_id and o.o_number = odp.o_number
+  		  	 		)	
+  		  	 	orders where o_number=#{o_number} and p_id=#{p_id}
+   				
+	</select>
+	
+	<select  id="getWaitingProduct" resultType="com.sonsoo.domain.RefundListVO">
+	  		select * from RefundList where o_number=#{o_number} and p_id=#{p_id}
+	</select>
+	
+	<!-- 구매취소 -->
+	<insert id="insertCancelOrder">
+		insert into RefundList(seq, o_number, refundMeans ,refundSystem, p_id, qty, price, id, name, phone, postcode, address, totalcost) 
+		values (seq_refundlist.nextval, #{o_number},#{refundMeans}, '구매취소',#{p_id}, #{qty},#{price},#{id}, #{name}, #{phone}, #{postcode}, #{address}, #{totalCost})
+	</insert>
+	
+	<!-- 환불 신청 -->
+	<insert id="insertRefundOrder">
+		insert into RefundList(seq, o_number, refundMeans,refundSystem ,p_id, qty, price, id, name, phone, postcode, address, totalcost) 
+		values (seq_refundlist.nextval, #{o_number},#{refundMeans},#{refundSystem},#{p_id}, #{qty}, #{price}, #{id}, #{name}, #{phone}, #{postcode}, #{address}, #{totalCost})
+	</insert>
+	
+	<update id="updateCancelStatus">
+		update orderedProduct set status = 8 where o_number=#{o_number} and p_id=#{p_id}
+	</update>
+	
+	<update id="updateRefundStatus">
+		update orderedProduct set status = 6 where o_number=#{o_number} and p_id=#{p_id}
+	</update>
+	
+	<update id="updateConfirmation">
+		update orderedProduct set status = 5 where o_number=#{o_number} and p_id=#{p_id}
+	</update>
+	
+	<update id="updateStatus">
+		update orderedProduct set status = #{status} where o_number=#{o_number} and p_id=#{p_id}
+	</update>
+	
+	<!-- 환불 수락일 update -->
+	<update id="updateRefundAccept">
+		update RefundList set refundDate = #{refundDate} where o_number=#{o_number} and p_id=#{p_id}
+	</update>
+</mapper>	

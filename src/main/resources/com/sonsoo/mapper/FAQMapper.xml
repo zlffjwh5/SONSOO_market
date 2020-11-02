@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.FAQMapper">
+
+  <!-- sql 모듈 -->
+  <sql id="criteria">
+  	<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+  		<foreach collection="typeArr" item="type">
+  			<trim prefix="OR">
+  				<choose>
+  					<when test="type=='T'.toString()">title like '%'||#{keyword}||'%'</when>
+  					<when test="type=='C'.toString()">content like '%'||#{keyword}||'%'</when>
+  					<when test="type=='TC'.toString()">content like '%'||#{keyword}||'%'  or title like '%'||#{keyword}||'%'</when>
+  				</choose>
+  			</trim>
+  		</foreach>
+  	</trim>
+  </sql>
+
+	<insert id="insert" parameterType="com.sonsoo.domain.FAQVO">
+		insert into faq(bno,title,summary,content,thumbnail) values(seq_faq.nextval,#{title},#{summary},#{content},#{thumbnail})
+ 	</insert>
+ 	
+ 	<select id="getListWithPaging" resultType="com.sonsoo.domain.FAQVO">
+
+<![CDATA[
+       select  bno,title,summary,content,regDate,cnt,thumbnail
+        from
+      (
+  		 select /*+index_desc(faq pk_faq) */ 
+  		           rownum rn, bno,title,summary,content,regDate,cnt,thumbnail
+  		   from faq where
+  ]]>
+  <include refid="criteria"/>
+  <![CDATA[
+		rownum<=#{pageNum}*#{amount}
+		)
+		where rn > (#{pageNum}-1)*#{amount}
+  ]]>
+</select>  
+  
+  
+ 	<select id="get" resultType="com.sonsoo.domain.FAQVO">
+  		select * from faq where bno=#{bno}
+  	</select>
+  	
+  	<delete id="remove">
+     	delete from faq where bno=#{bno}
+  	</delete>
+  	
+  	<update id="update">
+  		update faq set 
+  									title=#{title},
+  									summary=#{summary},
+               						content=#{content},
+               						thumbnail=#{thumbnail}
+    	 where bno=#{bno}
+  	</update>
+  	
+  	<select id="getTotalCount" resultType="int">
+  	<![CDATA[ select count(*) from faq where ]]> 
+  	<include refid="criteria"/>
+  	<![CDATA[ bno>0 ]]>
+  	</select>
+  
+    <update id="updateReadCnt">
+  		update faq set cnt = cnt +1 where bno = #{bno}
+  	</update>
+ 	
+</mapper>

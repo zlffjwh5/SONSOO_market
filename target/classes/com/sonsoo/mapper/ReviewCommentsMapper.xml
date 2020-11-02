@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.ReviewCommentsMapper">
+
+	<insert id="insertReviewComments">
+	<![CDATA[
+		insert into reviewComments (rcno, rno, id, content)
+		values ((select nvl(max(rcno),0)+1 from reviewComments), #{rno}, #{id}, #{content})
+	]]>
+	</insert>
+	
+	<delete id="deleteReviewComments">
+	<![CDATA[
+		delete from reviewComments where rcno = #{rcno}
+	]]>
+	</delete>
+	
+	<select id="getReviewCommentsList" resultType="com.sonsoo.domain.ReviewCommentsVO">
+	<![CDATA[
+		select * from reviewComments where rno = #{rno} order by rcno
+	]]>
+	</select>
+
+</mapper>

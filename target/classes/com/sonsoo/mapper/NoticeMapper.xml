@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.NoticeMapper">
+
+  <!-- sql 모듈 -->
+  <sql id="criteria">
+  	<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+  		<foreach collection="typeArr" item="type">
+  			<trim prefix="OR">
+  				<choose>
+  					<when test="type=='T'.toString()">title like '%'||#{keyword}||'%'</when>
+  					<when test="type=='C'.toString()">content like '%'||#{keyword}||'%'</when>
+  					<when test="type=='TC'.toString()">content like '%'||#{keyword}||'%'  or title like '%'||#{keyword}||'%'</when>
+  				</choose>
+  			</trim>
+  		</foreach>
+  	</trim>
+  </sql>
+
+	<insert id="insert" parameterType="com.sonsoo.domain.NoticeVO">
+		insert into notice(bno,title,summary,content,thumbnail) values(seq_notice.nextval,#{title},#{summary},#{content},#{thumbnail})
+ 	</insert>
+ 	
+ 	<select id="getListWithPaging" resultType="com.sonsoo.domain.NoticeVO">
+
+<![CDATA[
+       select  bno,title,summary,content,regDate,cnt,thumbnail
+        from
+      (
+  		 select /*+index_desc(notice pk_notice) */ 
+  		           rownum rn, bno,title,summary,content,regDate,cnt,thumbnail
+  		   from notice where
+  ]]>
+  <include refid="criteria"/>
+  <![CDATA[
+		rownum<=#{pageNum}*#{amount}
+		)
+		where rn > (#{pageNum}-1)*#{amount}
+  ]]>
+</select>  
+  
+  
+ 	<select id="get" resultType="com.sonsoo.domain.NoticeVO">
+  		select * from notice where bno=#{bno}
+  	</select>
+  	
+  	<delete id="remove">
+     	delete from notice where bno=#{bno}
+  	</delete>
+  	
+  	<update id="update">
+  		update notice set 
+  									title=#{title},
+  									summary=#{summary},
+               						content=#{content},
+               						thumbnail=#{thumbnail}
+    	 where bno=#{bno}
+  	</update>
+  	
+  	<select id="getTotalCount" resultType="int">
+  	<![CDATA[ select count(*) from notice where ]]> 
+  	<include refid="criteria"/>
+  	<![CDATA[ bno>0 ]]>
+  	</select>
+  
+    <update id="updateReadCnt">
+  		update notice set cnt = cnt +1 where bno = #{bno}
+  	</update>
+ 	
+</mapper>

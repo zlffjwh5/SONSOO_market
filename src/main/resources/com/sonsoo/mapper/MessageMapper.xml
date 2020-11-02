@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.sonsoo.mapper.MessageMapper">
+
+	<select id="getreadMessageListWithPaging" resultType="com.sonsoo.domain.MessageVO">
+	<![CDATA[
+		select * from
+		(select rownum rn, msg_seq, sender, reader, title, content, regDate, MsgCheck from
+		(select msg_seq, sender, reader, title, content, regDate, MsgCheck 
+		from readMessage where reader = #{reader} order by msg_seq desc))
+		where rn <= ((#{cri.pageNum}) * #{cri.amount}) 
+		and  rn > (#{cri.pageNum}-1) * #{cri.amount}
+	]]>
+	</select>
+	
+	<select id="getsendMessageListWithPaging" resultType="com.sonsoo.domain.MessageVO">
+	<![CDATA[
+		select * from
+		(select rownum rn, msg_seq, sender, reader, title, content, regDate from
+		(select msg_seq, sender, reader, title, content, regDate
+		from sendMessage where sender = #{sender} order by msg_seq desc))
+		where rn <= ((#{cri.pageNum}) * #{cri.amount}) 
+		and  rn > (#{cri.pageNum}-1) * #{cri.amount}
+	]]>
+	</select>
+	
+	<select id="getReadMsgCntBySeq" resultType="int">
+	<![CDATA[
+		select count(*) from readMessage where reader = #{reader}
+	]]>
+	</select>
+
+	<select id="getSendMsgCntBySeq" resultType="int">
+	<![CDATA[
+		select count(*) from sendMessage where sender = #{sender}
+	]]>
+	</select>
+
+	<select id="getreadMessage" resultType="com.sonsoo.domain.MessageVO">
+	<![CDATA[
+		select * from readmessage where msg_seq = #{meg_seq}
+	]]>
+	</select>
+	
+	<select id="getsendMessage" resultType="com.sonsoo.domain.MessageVO">
+	<![CDATA[
+		select * from sendmessage where msg_seq = #{meg_seq}
+	]]>
+	</select>
+
+	
+	<insert id="insertreadMessage">
+	<![CDATA[
+		insert into readMessage (msg_seq, sender, reader, title, content) 
+		values (msg_seq_readMessage.nextval, #{sender}, #{reader}, #{title}, #{content})
+	]]>
+	</insert>
+	
+	<insert id="insertsendMessage">
+	<![CDATA[
+		insert into sendMessage (msg_seq, sender, reader, title, content) 
+		values (msg_seq_readMessage.nextval, #{sender}, #{reader}, #{title}, #{content})
+	]]>
+	</insert>
+	
+	<delete id="deleteReadMessage">
+	<![CDATA[
+		delete from readMessage where msg_seq = #{msg_seq}
+	]]>
+	</delete>
+	
+	<delete id="deletesendMessage">
+	<![CDATA[
+		delete from sendMessage where msg_seq = #{msg_seq}
+	]]>
+	</delete>
+
+	<update id="readMsgCheck">
+	<![CDATA[
+		update readMessage set MsgCheck = 'YES' where msg_seq = #{msg_seq}
+	]]>
+	</update>
+	
+	<select id="notReadMsgCount" resultType="int">
+	<![CDATA[
+		select count(*) from readMessage where reader = #{reader} and MsgCheck = 'NO'
+	]]>
+	</select>
+	
+	<select id="unreadMsg3Cnt" resultType="com.sonsoo.domain.MessageVO">
+ 	<![CDATA[
+ 		select * from readMessage where msgCheck = 'NO' and reader = #{reader} order by msg_seq desc
+ 	]]>
+ 	</select>
+ 	
+ 	<select id="memberCheck" resultType="int">
+ 	<![CDATA[
+ 		select count(*) as id from member where id = #{reader}
+ 	]]>
+ 	</select>
+
+</mapper>

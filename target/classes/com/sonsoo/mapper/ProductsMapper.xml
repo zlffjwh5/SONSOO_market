@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.sonsoo.mapper.ProductsMapper">
+
+	<!-- 상품 목록 -->
+	<select id="getProductList" resultType="com.sonsoo.domain.ProductVO">
+		select *
+		from (  select /*+INDEX_DESC(products pk_board)*/
+				rownum rn, p_id, name, price, tnImage, id, category, stock
+				from products
+				where 1=1					
+				<if test="category!=null and category!='%%'">
+					and category = #{category}
+				</if>
+				<if test="type!=null and type!='%%'">
+					<choose>
+						<when test="type=='N'.toString()">
+							and name like '%'||#{keyword}||'%'
+						</when>
+						<when test="type=='S'.toString()">
+							and id like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</if>			
+			<![CDATA[			
+				and rownum <=#{pageNum} * #{amount}
+				) where rn > (#{pageNum}-1) * #{amount}
+			]]>
+	</select>	
+	<!-- 전체 조회 건수 -->
+	<select id="getTotalCount" resultType="int">
+		<![CDATA[ select count(*) from products where 1=1]]>
+			<if test="category!=null and category!='%%'">
+				and category = #{category}
+			</if>
+			<if test="type!=null and type!='%%'">
+				<choose>
+					<when test="type=='N'.toString()">
+						and name like '%'||#{keyword}||'%'
+					</when>
+					<when test="type=='S'.toString()">
+						and id like '%'||#{keyword}||'%'
+					</when>
+				</choose>
+			</if>
+	</select>
+	
+	
+	
+	<!-- 상품 상세 -->
+	<select id="getProduct" resultType="com.sonsoo.domain.ProductVO">
+		<![CDATA[ select * from products where p_id=#{p_id} ]]>
+	</select>
+	<!-- 조회 건수 증가 -->
+	<update id="updateReadCount">
+		<![CDATA[ update products set cnt=cnt+1 where p_id=#{p_id}]]>
+	</update>
+	<!-- 좋아요 -->
+	<update id="updateLikeCount">
+  		<![CDATA[ update products set likey=likey+1 where p_id=#{p_id}]]>
+  	</update>
+  	
+  	
+  	
+  	<!-- 상품 카테고리 목록 -->
+	<select id="getCategoryList" resultType="String">
+		<![CDATA[ select c_name from productCategory ]]>
+	</select>
+  	
+  	
+
+	<!-- 등록 -->
+	<insert id="registerProduct">
+		<selectKey keyProperty="p_id" order="BEFORE" resultType="String">
+			select concat('P',TO_NUMBER(substr(max(p_id),2))+1) from products
+		</selectKey>
+		<![CDATA[
+			insert into products (p_id,name,category,price,stock,likey,cnt,script,tnImage,id)
+			values (#{p_id},#{name},#{category},#{price},#{stock},0,0,#{script},#{tnImage},#{id})
+		]]>
+	</insert>	
+	<!-- 수정 -->
+	<update id="modifyProduct">
+		<![CDATA[
+			update products 
+			set name=#{name}, category=#{category}, price=#{price}, stock=#{stock}, script = #{script}]]>
+			<if test="tnImage!=null and tnImage!=''">, tnImage=#{tnImage}</if>
+		<![CDATA[
+			where p_id = #{p_id}
+		]]>	
+	</update>	
+	<!-- 삭제 -->
+	<delete id="deleteProduct">
+		<![CDATA[ delete from products where p_id=#{p_id} ]]>
+	</delete>
+	
+	
+	
+	<!-- 판매자 목록 -->
+	<!-- 판매자 상품 목록 -->
+	<select id="getSellerProductList" resultType="com.sonsoo.domain.ProductVO">
+		<![CDATA[ select * from products where id=#{id}]]>
+	</select>
+	
+	
+	
+	<!-- 장바구니 목록 -->
+	<select id="cartList" resultType="com.sonsoo.domain.CartVO">
+		<![CDATA[ 
+			select A.seq,A.p_id,B.name,B.price,B.tnImage,A.quantity
+			from cart A
+			join products B on A.p_id=B.p_id
+			where A.id=#{id}
+		]]>
+	</select>	
+	<!-- 장바구니 추가 -->
+	<insert id="addCart" parameterType="com.sonsoo.domain.CartVO">
+		<![CDATA[
+ 			insert into cart(seq,id,p_id,quantity) 
+    		values(seq_cart.nextval,#{id},#{p_id},#{quantity})
+ 		]]>
+	</insert>
+	<!-- 장바구니 수량변경 -->
+	<update id="changeCart">
+		<![CDATA[
+			update cart set quantity = #{quantity} where seq = #{seq}
+		]]>	
+	</update>
+	<!-- 장바구니 하나삭제 -->
+	<delete id="deleteCart">
+		<![CDATA[
+	 		delete from cart where seq = #{seq}
+	 	]]>
+	</delete>
+	<!-- 장바구니 전체삭제 -->
+	<delete id="deleteCarts">
+		<![CDATA[
+	 		delete from cart where id = #{id}
+	 	]]>
+	</delete>
+	<!-- 재고  -->
+	<update id="changeStock" parameterType="com.sonsoo.domain.OrderedProductVO">
+		<![CDATA[
+			update products set stock=stock-#{qty} where p_id=#{p_id}
+		]]>
+	</update>
+	<update id="refundStock" parameterType="com.sonsoo.domain.OrderVO">
+		<![CDATA[
+			update products set stock=stock+#{qty} where p_id=#{p_id}
+		]]>
+	</update>
+	
+</mapper>

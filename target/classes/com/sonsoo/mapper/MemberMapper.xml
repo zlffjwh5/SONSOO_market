@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.sonsoo.mapper.MemberMapper">
+	
+	<!-- 로그인 -->
+	<select id="getMember" resultType="com.sonsoo.domain.MemberVO">
+		<![CDATA[
+			select * from Member where id=#{id} and password=#{password}
+		]]>
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="join">
+		<![CDATA[
+			insert into member(id, password, name, phone, postcode, address, detailAddress, extraAddress) 
+			values(#{id}, #{password}, #{name}, #{phone}, #{postcode}, #{address}, #{detailAddress}, #{extraAddress})
+		]]>
+	</insert>
+	<select id="getMemberChk" resultType="com.sonsoo.domain.MemberVO">
+		<![CDATA[
+			select * from Member where id=#{id}
+		]]>
+	</select>
+	
+	<!-- 회원정보수정페이지로 넘어가기 -->
+	<select id="myinfo" resultType="com.sonsoo.domain.MemberVO">
+		<![CDATA[
+			select * from Member where id= #{id}
+		]]>
+	</select>
+	
+	<!-- 회원정보수정(패스워드포함) -->
+	<update id="mupdate">	
+	<![CDATA[		
+	           update Member
+	             set password=#{password},
+				name = #{name},
+				phone = #{phone},
+				postcode = #{postcode},
+				address = #{address},
+				extraAddress = #{extraAddress},
+				detailAddress = #{detailAddress}
+			where id = #{id}
+	]]>
+	</update>
+	
+	
+	<!-- 패스워드 제외 update -->
+	<update id="updateOmmitpassword">	
+	<![CDATA[		
+	           update Member
+	           set 	
+				name = #{name},
+				phone = #{phone},
+				postcode = #{postcode},
+				address = #{address},
+				extraAddress = #{extraAddress},
+				detailAddress = #{detailAddress}
+			where id = #{id}
+	]]>
+	</update>
+	
+	
+	<!-- 회원탈퇴 -->
+	<delete id="mdelete">
+		delete from Member where id = #{id}
+	</delete>
+	
+	<insert id="insertVisitDate">
+		<![CDATA[
+			insert into visitor (id) values (#{id})
+		]]>
+	</insert>
+	
+	
+</mapper>

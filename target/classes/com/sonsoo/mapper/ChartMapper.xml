@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper	namespace="com.sonsoo.mapper.ChartMapper">
+
+	<select id="memberMonthChart" resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select 
+			sum(decode(to_char(reg_date,'MM'), '01', 1)) "MON1",
+	   		sum(decode(to_char(reg_date,'MM'), '02', 1)) "MON2",
+	   		sum(decode(to_char(reg_date,'MM'), '03', 1)) "MON3",
+	   		sum(decode(to_char(reg_date,'MM'), '04', 1)) "MON4",
+	   		sum(decode(to_char(reg_date,'MM'), '05', 1)) "MON5",
+	   		sum(decode(to_char(reg_date,'MM'), '06', 1)) "MON6",
+	   		sum(decode(to_char(reg_date,'MM'), '07', 1)) "MON7",
+	   		sum(decode(to_char(reg_date,'MM'), '08', 1)) "MON8",
+	   		sum(decode(to_char(reg_date,'MM'), '09', 1)) "MON9",
+	   		sum(decode(to_char(reg_date,'MM'), '10', 1)) "MON10",
+	   		sum(decode(to_char(reg_date,'MM'), '11', 1)) "MON11",
+	   		sum(decode(to_char(reg_date,'MM'), '12', 1)) "MON12"
+		from member
+	]]>
+	</select>
+	
+	<select id="productMonthChart"  resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select 
+			count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '01' then 1 end) "MON1",
+			count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '02' then 1 end) "MON2",
+			count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '03' then 1 end) "MON3",
+	  		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '04' then 1 end) "MON4",
+	  		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '05' then 1 end) "MON5",
+	  		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '06' then 1 end) "MON6",
+	 		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '07' then 1 end) "MON7",
+	 		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '08' then 1 end) "MON8",
+	  		count(case when substr(p_id,1,1) = 'p' and to_char(o_date,'MM') = '09' then 1 end) "MON9"
+		from orders
+	]]>
+	</select>
+	
+	<select id="fundingMonthChart"  resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select 
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '01' then 1 end) "MON1",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '02' then 1 end) "MON2",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '03' then 1 end) "MON3",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '04' then 1 end) "MON4",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '05' then 1 end) "MON5",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '06' then 1 end) "MON6",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '07' then 1 end) "MON7",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '08' then 1 end) "MON8",
+			count(case when substr(p_id,1,1) = 'f' and to_char(o_date,'MM') = '09' then 1 end) "MON9"
+		from orders
+	]]>
+	</select>
+	
+	<select id="orderMonthTotalCost" resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select 
+			sum(case when to_char(o_date,'MM') = '01' then totalCost end) "MON1",
+	   		sum(case when to_char(o_date,'MM') = '02' then totalCost end) "MON2",
+	   		sum(case when to_char(o_date,'MM') = '03' then totalCost end) "MON3",
+	   		sum(case when to_char(o_date,'MM') = '04' then totalCost end) "MON4",
+	   		sum(case when to_char(o_date,'MM') = '05' then totalCost end) "MON5",
+	   		sum(case when to_char(o_date,'MM') = '06' then totalCost end) "MON6",
+	   		sum(case when to_char(o_date,'MM') = '07' then totalCost end) "MON7",
+	   		sum(case when to_char(o_date,'MM') = '08' then totalCost end) "MON8",
+	   		sum(case when to_char(o_date,'MM') = '09' then totalCost end) "MON9"
+		from orders
+	]]>
+	</select>
+	
+	<select id="totalCost" resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select sum(totalCost) as totalCost,
+	   		sum(case when substr(p_id,1,1) = 'f' then totalCost end) as fundingTotal,
+	   		sum(case when substr(p_id,1,1) = 'p' then totalCost end) as productTotal
+		from orders
+	]]>
+	</select>
+	
+	<select id="totalMember" resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select count(*) as totalMember from member
+	]]>
+	</select>
+	
+	<select id="totalProducts" resultType="com.sonsoo.domain.ChartVO">
+	<![CDATA[
+		select a.p_id, b.fp_id
+		from (select count(*) p_id from products) a,
+			 (select count(*) fp_id from funding_product) b
+	]]>
+	</select>
+
+</mapper>

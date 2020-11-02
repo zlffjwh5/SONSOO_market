@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sonsoo.mapper.FundingProductMapper">
+	<!-- 나의 펀딩 예약 목록 -->
+	<select id="myFundingOrderList" resultType="com.sonsoo.domain.FundingOrderVO">
+	<![CDATA[
+		select o.o_number, op.p_id, op.p_name, 
+			op.qty, o.o_date, o.status, op.tnimage,o.totalcost
+			from orders o
+			join orderedProduct op  on o.o_number=op.o_number
+			where o.o_number like 'FTN%' and o.id=#{id}
+		]]>
+	</select>
+	<!-- 펀딩 구매 취소하기 -->
+	<delete id="deleteFromOrders">
+		delete from Orders where o_number = #{o_number}
+	</delete>
+	<delete id="deleteFromOrderedProduct">
+		delete from orderedProduct where o_number = #{o_number}
+	</delete>
+
+	<!-- 펀딩 구매시 구매자가 구매한 갯수 받아와서 업뎃 -->
+	<update id="updateQty">
+		update Funding_Product set funding_qty = funding_qty + #{qty} where fp_id =#{fp_id}
+	</update>
+
+	<!-- 상품 추가 -->
+	<insert id="insertFP">
+		<selectKey keyProperty="fp_id" order="BEFORE" resultType="String">
+			select concat('F',TO_NUMBER(substr(max(fp_id),2))+1) from Funding_Product
+		</selectKey>
+		<![CDATA[
+		insert into Funding_Product (fp_id,fp_name,fp_category,fp_image,fp_description,fp_seller,fp_price,goal_cost,deadline,payDate) 
+		values(#{fp_id},#{fp_name},#{fp_category},#{fp_image},#{fp_description},#{fp_seller},#{fp_price},#{goal_cost},#{deadline},
+				#{deadline}+1)
+		]]>
+	</insert>
+
+	<!-- 상품리스트 얻기 -->
+	<select id="getFPList" resultType="com.sonsoo.domain.FundingProductVO">
+		<![CDATA[
+		select /*+ INDEX_DESC(Funding_Product pk_fp)*/
+		* from Funding_Product where deadline>sysdate
+		]]>
+
+	</select>
+	<select id="getListWithPaging" resultType="com.sonsoo.domain.FundingProductVO">
+		
+			select fp_id,fp_name,fp_category,fp_image,fp_price,goal_cost,deadline,funding_qty
+			from(
+				select /*+ INDEX_DESC(Funding_Product pk_fp)*/
+				rownum rn,fp_id,fp_name,fp_category,fp_image,fp_price,goal_cost,deadline,funding_qty
+				from Funding_Product where deadline>sysdate 
+				
+				<if test="type !=null and type!='%%'">	
+					and fp_category =#{type}
+				</if>
+				<if test="keyword !=null and keyword!='%%'">	
+					and fp_name like '%'||#{keyword}||'%'
+				</if>
+
+		<![CDATA[
+				and rownum<= #{pageNum}*#{amount}
+			)where rn> (#{pageNum}-1)*#{amount}
+		]]>
+	</select>
+	<!--상품 하나 상세 얻기-->
+	<select id="getFP" resultType="com.sonsoo.domain.FundingProductVO">
+		<![CDATA[
+		select * from Funding_Product where fp_id = #{fp_id}
+		]]>
+		
+	</select>
+	<!-- 상품 수정 -->
+	<update id="updateFP">
+		<![CDATA[
+		update Funding_Product set fp_name =#{fp_name}, fp_category=#{fp_category}, 
+		fp_description=#{fp_description},goal_cost=#{goal_cost},updateDate=sysdate,fp_state=#{fp_state}]]>
+		<if test="fp_image!=null and fp_image!=''">, fp_image=#{fp_image}</if>
+		<![CDATA[
+		where fp_id = #{fp_id}
+		]]>
+	</update>
+	<!-- 상품 삭제 -->
+	<delete id="deleteFP">
+		delete from Funding_Product where fp_id = #{fp_id}
+	</delete>
+	<!-- 목록 전체 갯수 얻기 (마감안된 것들)-->
+	<select id="getTotalCount" resultType="int">
+		<![CDATA[
+		select count(*) from Funding_Product where deadline>sysdate]]>
+		<if test="type !=null and type!='%%'">	
+			and fp_category =#{type}
+		</if>
+		<if test="keyword !=null and keyword!='%%'">	
+			and fp_name like '%'||#{keyword}||'%'
+		</if>
+
+	</select>
+	<!-- 목록 전체 갯수 얻기 (마감된 것 포함)-->
+	<select id="getTotalCountAdmin" resultType="int">
+		select count(*) from Funding_Product
+		<if test="type=='overDeadline'">	
+					<![CDATA[
+						where deadline<sysdate and fp_state =0
+					]]>
+		</if>
+		<if test="type=='%%'">
+			<if test="keyword!='' and keyword !=null ">
+				where fp_name like '%'||#{keyword}||'%' or
+				fp_seller like '%'||#{keyword}||'%' 
+			</if>	
+		</if>
+		<if test="type=='fp_name'">
+			<if test="keyword!='' and keyword !=null ">
+				where fp_name like '%'||#{keyword}||'%' 
+			</if>	
+		</if>
+		<if test="type=='seller'">
+			<if test="keyword!='' and keyword !=null ">
+				where fp_seller like '%'||#{keyword}||'%'
+			</if>	
+		</if>
+	</select>
+	<!-- 카테고리 리스트 얻기 -->
+	<select id="getCategoryList" resultType="com.sonsoo.domain.FundingCategoryVO">
+		select /*+ INDEX_ASC(Funding_Category pk_fc)*/
+		* from Funding_Category
+	</select>
+	<!-- 내가 주최한 상품목록 -->
+	<select id="getMyProducts" resultType="com.sonsoo.domain.FundingProductVO">
+		<![CDATA[
+		select /*+ INDEX_DESC(Funding_Product pk_fp)*/
+		* from Funding_Product where fp_seller=#{seller}
+		]]>
+	</select>
+	<!-- 관리자용 상품목록 -->
+	<select id="getAllProductsWithPaging" resultType="com.sonsoo.domain.FundingProductVO">
+	<![CDATA[
+				select fp_id,fp_name,fp_category,fp_image,fp_price,goal_cost,deadline,funding_qty,fp_seller,fp_state
+			from(
+				select /*+ INDEX_ASC(Funding_Product pk_fp)*/
+				rownum rn,fp_id,fp_name,fp_category,fp_image,fp_price,goal_cost,deadline,funding_qty,fp_seller,fp_state
+				from Funding_Product where
+				
+				]]>
+				<if test="type=='overDeadline'">	
+					<![CDATA[
+						deadline<sysdate and fp_state =0 and
+					]]>
+				</if>
+				<if test="type=='%%'">
+					<if test="keyword!='' and keyword !=null ">
+						fp_name like '%'||#{keyword}||'%' or
+						fp_seller like '%'||#{keyword}||'%' and
+					</if>	
+				</if>
+				<if test="type=='fp_name'">
+					<if test="keyword!='' and keyword !=null ">
+						fp_name like '%'||#{keyword}||'%' and
+					</if>	
+				</if>
+				<if test="type=='seller'">
+					<if test="keyword!='' and keyword !=null ">
+						fp_seller like '%'||#{keyword}||'%' and
+					</if>	
+				</if>
+		<![CDATA[	
+				rownum<= #{pageNum}*#{amount}
+			)where rn> (#{pageNum}-1)*#{amount}
+		]]>
+	</select>
+	
+</mapper>
